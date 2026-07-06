@@ -10,7 +10,9 @@ export const regexMatch: NodeSpec = {
   outputs: { result: { type: "boolean" } },
   group: ["text", "regex"],
   execute: (inputs) => {
-    return { result: (inputs.value as string).match(inputs.regex as string) };
+    return {
+      result: (inputs.value as string).match(inputs.regex as string) !== null,
+    };
   },
 };
 

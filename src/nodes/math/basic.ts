@@ -71,42 +71,35 @@ export const power: NodeSpec = {
   },
 };
 
-export const ceil: NodeSpec = {
-  typeId: "ceil",
-  displayName: "Ceil",
-  inputs: {
-    value: { type: "number" },
-  },
-  outputs: { result: { type: "number" } },
-  group: ["math", "basic", "rounding"],
-  execute: (inputs) => {
-    return { result: Math.ceil(inputs.value as number) };
-  },
-};
+export const roundingModeOptions = ["Ceil", "Floor", "Round"] as const;
 
-export const floor: NodeSpec = {
-  typeId: "floor",
-  displayName: "Floor",
-  inputs: {
-    value: { type: "number" },
-  },
-  outputs: { result: { type: "number" } },
-  group: ["math", "basic", "rounding"],
-  execute: (inputs) => {
-    return { result: Math.floor(inputs.value as number) };
-  },
-};
+type RoundingMode = (typeof roundingModeOptions)[number];
 
-export const round: NodeSpec = {
-  typeId: "round",
-  displayName: "Round",
+export const rounding: NodeSpec = {
+  typeId: "rounding",
+  displayName: "Rounding",
   inputs: {
+    mode: {
+      type: "choice",
+      userOnly: true,
+      defaultValue: "Round",
+      customProps: { options: [...roundingModeOptions] },
+    },
     value: { type: "number" },
   },
   outputs: { result: { type: "number" } },
   group: ["math", "basic", "rounding"],
   execute: (inputs) => {
-    return { result: Math.round(inputs.value as number) };
+    const value = inputs.value as number;
+    const mode = inputs.mode as RoundingMode;
+    switch (mode) {
+      case "Ceil":
+        return { result: Math.ceil(value) };
+      case "Floor":
+        return { result: Math.floor(value) };
+      case "Round":
+        return { result: Math.round(value) };
+    }
   },
 };
 
@@ -167,15 +160,32 @@ export const mapping: NodeSpec = {
   },
 };
 
+export const constant: NodeSpec = {
+  typeId: "constant",
+  displayName: "Constant",
+  inputs: {
+    value: {
+      type: "choice",
+      userOnly: true,
+      defaultValue: "pi",
+      customProps: { options: ["pi", "e"] },
+    },
+  },
+  outputs: { result: { type: "number" } },
+  group: ["math", "basic"],
+  execute: (inputs) => {
+    return { result: { pi: Math.PI, e: Math.E }[inputs.value as string] };
+  },
+};
+
 export const basicMathNodes: NodeSpecRegistry = {
   [add.typeId]: add,
   [subtract.typeId]: subtract,
   [multiply.typeId]: multiply,
   [divide.typeId]: divide,
   [power.typeId]: power,
-  [ceil.typeId]: ceil,
-  [floor.typeId]: floor,
-  [round.typeId]: round,
+  [rounding.typeId]: rounding,
   [absolute.typeId]: absolute,
   [mapping.typeId]: mapping,
+  [constant.typeId]: constant,
 };

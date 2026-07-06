@@ -40,6 +40,19 @@ export const trim: NodeSpec = {
   },
 };
 
+export const toLowerCase: NodeSpec = {
+  typeId: "toLowerCase",
+  displayName: "To Lower Case",
+  inputs: {
+    value: { type: "string" },
+  },
+  outputs: { result: { type: "string" } },
+  group: ["text", "basic"],
+  execute: (inputs) => {
+    return { result: (inputs.value as string).toLowerCase() };
+  },
+};
+
 export const toUpperCase: NodeSpec = {
   typeId: "toUpperCase",
   displayName: "To Upper Case",
@@ -78,5 +91,6 @@ export const textBasicNodes: NodeSpecRegistry = {
   [length.typeId]: length,
   [trim.typeId]: trim,
   [toUpperCase.typeId]: toUpperCase,
+  [toLowerCase.typeId]: toLowerCase,
   [simpleReplace.typeId]: simpleReplace,
 };
