@@ -181,24 +181,6 @@ export const isBlank: NodeSpec = {
   },
 };
 
-export const replaceAll: NodeSpec = {
-  typeId: "replaceAll",
-  displayName: "Replace All",
-  inputs: {
-    value: { type: "string" },
-    search: { type: "string" },
-    replacement: { type: "string" },
-  },
-  outputs: { result: { type: "string" } },
-  group: ["text", "basic"],
-  execute: (inputs) => {
-    const value = inputs.value as string;
-    const search = inputs.search as string;
-    const replacement = inputs.replacement as string;
-    return { result: value.split(search).join(replacement) };
-  },
-};
-
 export const textSliceNodes: NodeSpecRegistry = {
   [endsWith.typeId]: endsWith,
   [indexOf.typeId]: indexOf,
@@ -211,5 +193,4 @@ export const textSliceNodes: NodeSpecRegistry = {
   [reverse.typeId]: reverse,
   [isEmpty.typeId]: isEmpty,
   [isBlank.typeId]: isBlank,
-  [replaceAll.typeId]: replaceAll,
 };

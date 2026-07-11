@@ -1,4 +1,4 @@
-import type { NodeSpec, NodeSpecRegistry } from "@nodish/core";
+import type { IOSpec, NodeSpec, NodeSpecRegistry } from "@nodish/core";
 
 const scalarTypes = ["number", "string"] as const;
 
@@ -12,6 +12,21 @@ export const compareModeOptions = [
 ] as const;
 
 type CompareMode = (typeof compareModeOptions)[number];
+
+const compareModeInput: IOSpec = {
+  mode: {
+    type: "choice",
+    userOnly: true,
+    defaultValue: "Equal",
+    customProps: { options: [...compareModeOptions] },
+  },
+};
+
+const compareBaseInputs = (): IOSpec => ({
+  ...compareModeInput,
+  a: { type: "number", types: [...scalarTypes] },
+  b: { type: "number", types: [...scalarTypes] },
+});
 
 function compareScalars(
   mode: CompareMode,
@@ -43,26 +58,28 @@ export const compare: NodeSpec = {
   displayName: "Compare",
   group: ["compare"],
   inputs: {
-    mode: {
-      type: "choice",
-      userOnly: true,
-      defaultValue: "Equal",
-      customProps: { options: [...compareModeOptions] },
-    },
+    ...compareModeInput,
     a: { type: "number", types: [...scalarTypes] },
     b: { type: "number", types: [...scalarTypes] },
-    value: {
-      type: "number",
-      types: [...scalarTypes],
-      description: "Used for In Between mode",
-    },
   },
   outputs: { result: { type: "boolean" } },
+  resolvePorts: (params) => {
+    const mode = (params.mode as CompareMode | undefined) ?? "Equal";
+    const inputs = compareBaseInputs();
+    if (mode === "In Between") {
+      inputs.value = {
+        type: "number",
+        types: [...scalarTypes],
+        description: "Value to test against the range defined by a and b",
+      };
+    }
+    return { inputs, outputs: { result: { type: "boolean" } } };
+  },
   execute: (inputs) => {
     const mode = inputs.mode as CompareMode;
     const a = inputs.a as number | string;
     const b = inputs.b as number | string;
-    const value = inputs.value as number | string;
+    const value = (inputs.value as number | string | undefined) ?? a;
     return { result: compareScalars(mode, a, b, value) };
   },
 };

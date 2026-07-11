@@ -20,7 +20,6 @@ import { textBasicNodes } from "./nodes/text/basic";
 import { textCompareNodes } from "./nodes/text/compare";
 import { textSliceNodes } from "./nodes/text/slice";
 import { booleanBasicNodes } from "./nodes/boolean/basic";
-import { regexNodes } from "./nodes/text/regex";
 import { vectorIoNodes } from "./nodes/vector/io";
 import { vectorBasicNodes } from "./nodes/vector/basic";
 import { convertNodes } from "./nodes/convert/basic";
@@ -50,7 +49,6 @@ export const pack: NodePack = {
     ...textCompareNodes,
     ...textSliceNodes,
     ...booleanBasicNodes,
-    ...regexNodes,
     ...vectorIoNodes,
     ...vectorBasicNodes,
     ...convertNodes,
