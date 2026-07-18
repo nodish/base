@@ -1,4 +1,4 @@
-import type { NodeSpec, NodeSpecRegistry } from "@nodish/core";
+import type { IOSpec, NodeSpec, NodeSpecRegistry } from "@nodish/core";
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -15,6 +15,22 @@ function parseRegex(pattern: string, defaultFlags = ""): RegExp {
 
 const replaceModeOptions = ["First", "All", "Regex"] as const;
 type ReplaceMode = (typeof replaceModeOptions)[number];
+
+const replaceModeInput: IOSpec = {
+  mode: {
+    type: "choice",
+    userOnly: true,
+    defaultValue: "Regex",
+    customProps: { options: [...replaceModeOptions] },
+  },
+};
+
+const replaceBaseInputs = (): IOSpec => ({
+  ...replaceModeInput,
+  value: { type: "string" },
+  search: { type: "string" },
+  replacement: { type: "string" },
+});
 
 export const concatenate: NodeSpec = {
   typeId: "concatenate",
@@ -85,19 +101,22 @@ export const toUpperCase: NodeSpec = {
 export const replace: NodeSpec = {
   typeId: "replace",
   displayName: "Replace",
-  inputs: {
-    mode: {
-      type: "choice",
-      userOnly: true,
-      defaultValue: "All",
-      customProps: { options: [...replaceModeOptions] },
-    },
-    value: { type: "string" },
-    search: { type: "string" },
-    replacement: { type: "string" },
-  },
+  inputs: replaceBaseInputs(),
   outputs: { result: { type: "string" } },
   group: ["text", "basic"],
+  resolvePorts: (params) => {
+    const mode = (params.mode as ReplaceMode | undefined) ?? "Regex";
+    const inputs = replaceBaseInputs();
+    if (mode === "Regex") {
+      inputs.flags = {
+        type: "string",
+        userOnly: true,
+        defaultValue: "g",
+        description: "RegExp flags (e.g. g, i, m)",
+      };
+    }
+    return { inputs, outputs: { result: { type: "string" } } };
+  },
   execute: (inputs) => {
     const mode = inputs.mode as ReplaceMode;
     const value = asString(inputs.value);
@@ -113,8 +132,9 @@ export const replace: NodeSpec = {
       case "Regex":
         if (!search) return { result: value };
         try {
+          const flags = asString(inputs.flags) || "g";
           return {
-            result: value.replace(parseRegex(search, "g"), replacement),
+            result: value.replace(parseRegex(search, flags), replacement),
           };
         } catch {
           return { result: value };
