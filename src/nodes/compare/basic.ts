@@ -1,4 +1,5 @@
 import type { IOSpec, NodeSpec, NodeSpecRegistry } from "@nodish/core";
+import { equals } from "./equals";
 
 const scalarTypes = ["number", "string"] as const;
 
@@ -101,4 +102,5 @@ export const notEquals: NodeSpec = {
 export const compareNodes: NodeSpecRegistry = {
   [compare.typeId]: compare,
   [notEquals.typeId]: notEquals,
+  [equals.typeId]: equals,
 };

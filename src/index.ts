@@ -1,8 +1,5 @@
 import type { NodePack } from "@nodish/core";
-import {
-  registerComponentWidget,
-  registerTypeWidget,
-} from "@nodish/core";
+import { registerComponentWidget, registerTypeWidget } from "@nodish/core";
 import { number } from "./types/number";
 import { boolean, BOOLEAN_WIDGET_ID } from "./types/boolean/boolean";
 import Boolean from "./types/boolean/boolean.vue";
@@ -24,7 +21,6 @@ import { vectorIoNodes } from "./nodes/vector/io";
 import { vectorBasicNodes } from "./nodes/vector/basic";
 import { convertNodes } from "./nodes/convert/basic";
 import { selectNodes } from "./nodes/logic/select";
-import { assertNodes } from "./nodes/logic/assert";
 
 function registerWidgets(
   regComponent: typeof registerComponentWidget,
@@ -54,7 +50,6 @@ export const pack: NodePack = {
     ...vectorBasicNodes,
     ...convertNodes,
     ...selectNodes,
-    ...assertNodes,
   },
   types: {
     number: number,

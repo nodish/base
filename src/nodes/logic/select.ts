@@ -1,39 +1,40 @@
-import type { NodeSpec, NodeSpecRegistry } from "@nodish/core";
+import {
+  ANY_TYPE,
+  isAnyValue,
+  type AnyValue,
+  type NodeSpec,
+  type NodeSpecRegistry,
+} from "@nodish/core";
 
-const selectTypes = ["number", "string", "boolean", "vector", "choice"] as const;
-
-function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+function requireAnyValue(value: unknown, port: string): AnyValue {
+  if (!isAnyValue(value)) {
+    throw new Error(`Select: ${port} must be connected`);
+  }
+  return value;
 }
 
-function makeSelect(type: (typeof selectTypes)[number]): NodeSpec {
-  const label = capitalize(type);
-  return {
-    typeId: `select${label}`,
-    displayName: `Select ${label}`,
-    inputs: {
-      condition: { type: "boolean" },
-      ifTrue: { type },
-      ifFalse: { type },
-    },
-    outputs: { result: { type } },
-    group: ["logic", "select"],
-    execute: (inputs) => ({
-      result: inputs.condition ? inputs.ifTrue : inputs.ifFalse,
-    }),
-  };
-}
-
-const selectNumber = makeSelect("number");
-const selectString = makeSelect("string");
-const selectBoolean = makeSelect("boolean");
-const selectVector = makeSelect("vector");
-const selectChoice = makeSelect("choice");
+export const select: NodeSpec = {
+  typeId: "select",
+  displayName: "Select",
+  inputs: {
+    condition: { type: "boolean" },
+    ifTrue: { type: ANY_TYPE },
+    ifFalse: { type: ANY_TYPE },
+  },
+  outputs: { result: { type: ANY_TYPE } },
+  group: ["logic", "select"],
+  execute: (inputs) => {
+    const ifTrue = requireAnyValue(inputs.ifTrue, "ifTrue");
+    const ifFalse = requireAnyValue(inputs.ifFalse, "ifFalse");
+    if (ifTrue.type !== ifFalse.type) {
+      throw new Error(
+        `Select: ifTrue and ifFalse must have the same type (got "${ifTrue.type}" and "${ifFalse.type}")`,
+      );
+    }
+    return { result: inputs.condition ? ifTrue : ifFalse };
+  },
+};
 
 export const selectNodes: NodeSpecRegistry = {
-  [selectNumber.typeId]: selectNumber,
-  [selectString.typeId]: selectString,
-  [selectBoolean.typeId]: selectBoolean,
-  [selectVector.typeId]: selectVector,
-  [selectChoice.typeId]: selectChoice,
+  [select.typeId]: select,
 };

@@ -1,5 +1,23 @@
 import type { NodeSpecRegistry, NodeSpec } from "@nodish/core";
 
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+export const stringEquals: NodeSpec = {
+  typeId: "stringEquals",
+  displayName: "Equals",
+  inputs: {
+    a: { type: "string" },
+    b: { type: "string" },
+  },
+  outputs: { result: { type: "boolean" } },
+  group: ["compare"],
+  execute: (inputs) => ({
+    result: asString(inputs.a) === asString(inputs.b),
+  }),
+};
+
 export const contains: NodeSpec = {
   typeId: "contains",
   displayName: "Contains",
@@ -31,6 +49,7 @@ export const startsWith: NodeSpec = {
 };
 
 export const textCompareNodes: NodeSpecRegistry = {
+  [stringEquals.typeId]: stringEquals,
   [contains.typeId]: contains,
   [startsWith.typeId]: startsWith,
 };
